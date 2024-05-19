@@ -1,3 +1,4 @@
+from datetime import date
 from sqlalchemy.orm import Session
 from app import models, schemas
 from typing import List
@@ -8,7 +9,7 @@ def get_user_by_username(db: Session, username: str):
 def create_user(db: Session, user: schemas.UserCreate):
     db_user = models.User(
         username=user.username,
-        hashed_password=user.password,  
+        hashed_password=user.password,
         email=user.email,
         full_name=user.full_name,
         role=user.role
@@ -28,12 +29,12 @@ def remove_all_users(db: Session):
     db.query(models.User).delete()
     db.commit()
 
-def create_calorie_log(db: Session, calorie_log: schemas.CalorieLogCreate):
-    db_calorie_log = models.CalorieLog(**calorie_log.model_dump())
+def create_calorie_log(db: Session, calorie_log: schemas.CalorieLogCreate, user_id: int):
+    db_calorie_log = models.CalorieLog(**calorie_log.dict(), user_id=user_id)
     db.add(db_calorie_log)
     db.commit()
     db.refresh(db_calorie_log)
     return db_calorie_log
 
-def get_calorie_logs(db: Session, user_id: int, date: str):
-    return db.query(models.CalorieLog).filter(models.CalorieLog.user_id == user_id, models.CalorieLog.logged_date == date).all()
+def get_calorie_logs(db: Session, user_id: int, date: date):
+    return db.query(models.CalorieLog).filter(models.CalorieLog.user_id == user_id, models.CalorieLog.date == date).all()

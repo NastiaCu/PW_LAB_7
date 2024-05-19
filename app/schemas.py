@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import date
 
 class UserBase(BaseModel):
     username: str
@@ -28,15 +29,16 @@ class Message(BaseModel):
     message: str
 
 class CalorieLogBase(BaseModel):
-    description: str
+    date: date
+    food_item: str
     calories: float
-    user_id: int
 
 class CalorieLogCreate(CalorieLogBase):
     pass
 
 class CalorieLog(CalorieLogBase):
     id: int
+    user_id: int
 
     class Config:
         orm_mode = True

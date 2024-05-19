@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import Column, Date, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -16,11 +16,12 @@ class User(Base):
     calorie_logs = relationship("CalorieLog", back_populates="user")
 
 class CalorieLog(Base):
-    __tablename__ = "calorie_logs"
-
+    __tablename__ = 'calorie_logs'
+    
     id = Column(Integer, primary_key=True, index=True)
+    date = Column(Date, nullable=False)
+    food_item = Column(String, index=True)
+    calories = Column(Float, nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'))
-    logged_date = Column(DateTime, nullable=False)
-    calories_consumed = Column(Float, nullable=False)
-
+    
     user = relationship("User", back_populates="calorie_logs")
