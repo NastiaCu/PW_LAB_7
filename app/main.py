@@ -1,11 +1,12 @@
-from datetime import timedelta
-from typing import List
+from datetime import date, timedelta
+from typing import List, Optional
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app import crud, models, schemas, auth
 from app.database import SessionLocal, engine
 from app.dependencies import get_current_admin_user
+from fastapi.middleware.cors import CORSMiddleware
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -17,6 +18,14 @@ def get_db():
         yield db
     finally:
         db.close()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/register", response_model=schemas.User)
 async def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -55,3 +64,20 @@ async def read_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_d
 def remove_all_users(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_admin_user)):
     crud.remove_all_users(db)
     return {"detail": "All users have been removed."}
+
+@app.post("/calorie-logs/", response_model=schemas.CalorieLog)
+def create_calorie_log(
+    calorie_log: schemas.CalorieLogCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    db_calorie_log = crud.create_calorie_log(db=db, calorie_log=calorie_log)
+    return db_calorie_log
+
+@app.get("/calorie-logs/{date}", response_model=List[schemas.CalorieLog])
+def read_calorie_logs(
+    date: date,
+    db: Session = Depends(SessionLocal),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    return crud.get_calorie_logs(db=db, user_id=current_user.id, date=date)

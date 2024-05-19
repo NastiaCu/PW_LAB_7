@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import Optional
 
 class UserBase(BaseModel):
     username: str
@@ -26,3 +26,17 @@ class TokenData(BaseModel):
 
 class Message(BaseModel):
     message: str
+
+class CalorieLogBase(BaseModel):
+    description: str
+    calories: float
+    user_id: int
+
+class CalorieLogCreate(CalorieLogBase):
+    pass
+
+class CalorieLog(CalorieLogBase):
+    id: int
+
+    class Config:
+        orm_mode = True
